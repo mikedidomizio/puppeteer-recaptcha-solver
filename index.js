@@ -1,6 +1,10 @@
 const axios = require('axios')
 const https = require('https')
 
+const userAgents = JSON.parse(
+    require("fs").readFileSync(`${__dirname}/useragents.json`)
+);
+
 function rdn(min, max) {
   min = Math.ceil(min)
   max = Math.floor(max)
@@ -9,6 +13,8 @@ function rdn(min, max) {
 
 async function solve(page) {
   try {
+    const userAgent = userAgents[Math.floor(Math.random() * userAgents.length)].useragent;
+
     await page.waitForFunction(() => {
       const iframe = document.querySelector('iframe[src*="api2/anchor"]')
       if (!iframe) return false
@@ -69,7 +75,8 @@ async function solve(page) {
         data: new Uint8Array(audioBytes).buffer,
         headers: {
           Authorization: 'Bearer JVHWCNWJLWLGN6MFALYLHAPKUFHMNTAC',
-          'Content-Type': 'audio/mpeg3'
+          'Content-Type': 'audio/mpeg3',
+          'User-Agent': userAgent
         }
       })
 
