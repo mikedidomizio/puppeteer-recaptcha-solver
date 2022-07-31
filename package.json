@@ -9,5 +9,8 @@
     "puppeteer": "^13.5.2",
     "puppeteer-extra": "^3.2.3",
     "puppeteer-extra-plugin-stealth": "^2.9.0"
+  },
+  "scripts": {
+    "demo-wo-proxy": "node ./examples/demo-wo-proxy.js"
   }
 }

@@ -2,67 +2,54 @@ const puppeteer = require('puppeteer-extra')
 const pluginStealth = require('puppeteer-extra-plugin-stealth')
 
 const solve = require('../index.js')
+const UserAgents = require('../useragents');
+
+async function runInstance (headless = false) {
+  const random = Math.floor(Math.random() * 500) + 400
+
+  const browser1 = await puppeteer.launch({
+    headless,
+    args: [
+        `--window-size=${random},${random + 50}`, '--window-position=010,010', '--no-sandbox', '--disable-dev-shm-usage',
+        '--disable-web-security', '--disable-features=IsolateOrigins', ' --disable-site-isolation-trials',
+    ]
+  })
+  const [page1] = await browser1.pages();
+  await page1.setDefaultNavigationTimeout(0)
+  // await page1.setUserAgent(UserAgents.getRandom())
+  await page1.setUserAgent('5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36');
+  // await page1.goto('https://www.google.com/recaptcha/api2/demo')
+  await page1.goto('https://www.boxrec.com/recaptcha')
+
+  const response = await solve(page1)
+
+  browser1.close()
+
+  console.log(UserAgents.getRandom())
+  return response;
+}
 
 async function run () {
   puppeteer.use(pluginStealth())
 
-  const browser1 = await puppeteer.launch({
-    headless: false,
-    args: ['--window-size=360,500', '--window-position=000,000', '--no-sandbox', '--disable-dev-shm-usage', '--disable-web-security', '--disable-features=IsolateOrigins', ' --disable-site-isolation-trials']
-  })
+  const headless = false;
 
-  const browser2 = await puppeteer.launch({
-    headless: false,
-    args: ['--window-size=360,500', '--window-position=000,000', '--no-sandbox', '--disable-dev-shm-usage', '--disable-web-security', '--disable-features=IsolateOrigins', ' --disable-site-isolation-trials']
-  })
+  const response = await Promise.allSettled([
+    runInstance(headless),
+  ]);
 
-  const browser3 = await puppeteer.launch({
-    headless: false,
-    args: ['--window-size=360,500', '--window-position=000,000', '--no-sandbox', '--disable-dev-shm-usage', '--disable-web-security', '--disable-features=IsolateOrigins', ' --disable-site-isolation-trials']
-  })
+  const {successes, failures} = response.reduce((acc, cur) => {
+    if (cur.value) {
+      acc.successes++;
+      return acc;
+    }
+    acc.failures++;
+    return acc;
+  }, { successes: 0, failures: 0 });
 
-  const browser4 = await puppeteer.launch({
-    headless: false,
-    args: ['--window-size=360,500', '--window-position=000,000', '--no-sandbox', '--disable-dev-shm-usage', '--disable-web-security', '--disable-features=IsolateOrigins', ' --disable-site-isolation-trials']
-  })
-
-  const browser5 = await puppeteer.launch({
-    headless: false,
-    args: ['--window-size=360,500', '--window-position=000,000', '--no-sandbox', '--disable-dev-shm-usage', '--disable-web-security', '--disable-features=IsolateOrigins', ' --disable-site-isolation-trials']
-  })
-
-  const browser6 = await puppeteer.launch({
-    headless: false,
-    args: ['--window-size=360,500', '--window-position=000,000', '--no-sandbox', '--disable-dev-shm-usage', '--disable-web-security', '--disable-features=IsolateOrigins', ' --disable-site-isolation-trials']
-  })
-
-  const page1 = await browser1.newPage()
-  const page2 = await browser2.newPage()
-  const page3 = await browser3.newPage()
-  const page4 = await browser4.newPage()
-  const page5 = await browser5.newPage()
-  const page6 = await browser6.newPage()
-
-  await page1.setDefaultNavigationTimeout(0)
-  await page2.setDefaultNavigationTimeout(0)
-  await page3.setDefaultNavigationTimeout(0)
-  await page4.setDefaultNavigationTimeout(0)
-  await page5.setDefaultNavigationTimeout(0)
-  await page6.setDefaultNavigationTimeout(0)
-
-  page1.goto('https://www.google.com/recaptcha/api2/demo')
-  page2.goto('https://www.google.com/recaptcha/api2/demo')
-  page3.goto('https://www.google.com/recaptcha/api2/demo')
-  page4.goto('https://www.google.com/recaptcha/api2/demo')
-  page5.goto('https://www.google.com/recaptcha/api2/demo')
-  page6.goto('https://www.google.com/recaptcha/api2/demo')
-
-  solve(page1)
-  solve(page2)
-  solve(page3)
-  solve(page4)
-  solve(page5)
-  solve(page6)
+  console.log('done!');
+  console.log('Number of successes:', successes);
+  console.log('Number of failures:', failures);
 }
 
 console.log('`ctrl + c` to exit')
