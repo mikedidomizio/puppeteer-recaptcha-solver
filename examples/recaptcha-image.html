@@ -1,0 +1,111 @@
+<html>
+<head>
+
+</head>
+<body>
+<img src="img.png" />
+<canvas id="canvas"></canvas>
+<script>
+    const ImageDataToBlob = function(imageData){
+        let w = imageData.width;
+        let h = imageData.height;
+        let canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        let ctx = canvas.getContext("2d");
+        ctx.putImageData(imageData, 0, 0, w, h);        // synchronous
+
+        return new Promise((resolve, reject) => {
+            canvas.toBlob(resolve); // implied image/png format
+        })
+    }
+
+    function getClippedRegion(imageSrc, x, y, width, height) {
+        const img = new Image();
+        img.src = imageSrc;
+
+        img.addEventListener('load', function() {
+            console.log('loaded')
+            // execute drawImage statements here
+            const canvas = document.getElementById('canvas'),
+                ctx = canvas.getContext('2d');
+
+            canvas.width = width;
+            canvas.height = height;
+
+            console.log(img, x, y, width, height);
+            //                   source region         dest. region
+            ctx.drawImage(img, x, y, width, height,  0, 0, width, height);
+
+            return canvas;
+        }, false);
+    }
+
+    async function splitImageIntoPieces(imageSrc, numberOfPieces) {
+        const img = new Image(300, 300);
+        img.src = imageSrc;
+
+        img.addEventListener('load', async function() {
+            console.log('loaded')
+
+            const {clientWidth: width, clientHeight: height} = img;
+
+            console.log(img.clientHeight);
+
+            // execute drawImage statements here
+            const canvas = document.getElementById('canvas'),
+                ctx = canvas.getContext('2d');
+
+            canvas.width = 100;
+            canvas.height = 100;
+
+            if (numberOfPieces === 9) {
+
+            } else if (numberOfPieces === 16) {
+
+            } else {
+                throw new Error('unknown number of pieces');
+            }
+
+            ctx.drawImage(img, 0, 0, 100, 100,  0, 0, 100, 100);
+            // const imgData = ctx.getImageData(0, 0, 100, 100);
+
+            const u = await new Promise((resolve) => {
+                canvas.toBlob(function(blob){
+                    resolve(blob)
+                },'image/png');
+            })
+            console.log(u);
+
+            ctx.drawImage(img, 100, 0, 100, 100,  0, 0, 100, 100);
+
+            const v = await new Promise((resolve) => {
+                canvas.toBlob(function(blob){
+                    resolve(blob)
+                },'image/png');
+            })
+            console.log(v);
+
+            // return canvas;
+        }, false);
+    }
+
+    var image = './img.png';
+
+    var canvas = document.getElementById('canvas'),
+        ctx    = canvas.getContext('2d');
+        // clip   = getClippedRegion(image, 0, 0, 50, 50);
+
+    (async() => {
+
+        const output = await splitImageIntoPieces(image, 9);
+
+        console.log(output);
+    })();
+
+
+    // draw the clipped image onto the on-screen canvas
+    // ctx.drawImage(clip, canvas.width * Math.random(), canvas.height * Math.random());
+</script>
+</body>
+</html>

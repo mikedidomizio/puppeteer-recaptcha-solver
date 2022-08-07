@@ -1,5 +1,9 @@
 const axios = require('axios')
 const https = require('https')
+const {readFileSync, writeFileSync} = require("fs");
+const cocoSsd = require('@tensorflow-models/coco-ssd');
+const tf = require('@tensorflow/tfjs-node');
+const {tensor} = require("./utils");
 
 function rdn(min, max) {
   min = Math.ceil(min)
@@ -52,7 +56,7 @@ async function solve(page) {
 
 
     const checkbox = await recaptchaFrame.$('#recaptcha-anchor')
-    await checkbox.click({ delay: rdn(200, 4000) })
+    await checkbox.click({ delay: rdn(200, 1000) })
 
      const { left: iframeLeft, top: iframeTop } = await page.evaluate(() => {
       return getOffset(document.querySelector('iframe[title="reCAPTCHA"]'));
@@ -72,8 +76,69 @@ async function solve(page) {
 
     const imageFrame = frames.find(frame => frame.url().includes('api2/bframe'))
 
-    console.log('click?')
-    await page.mouse.move(300, 42);
+    // todo in progress
+    const imgSrc = await imageFrame.evaluate(() => document.querySelector('img').getAttribute('src'));
+    const numberOfFrames = await imageFrame.evaluate(() => document.querySelectorAll('.rc-imageselect-checkbox').length);
+
+
+    let response = await page.evaluate((i) => {
+        const img = new Image();
+        img.src = i;
+
+        const canvas = document.createElement('canvas'),
+            ctx = canvas.getContext('2d');
+
+        canvas.id = "test";
+
+        canvas.width = 100;
+        canvas.height = 100;
+
+        // todo don't need I think
+        document.body.append(canvas)
+
+            // ctx.fillRect(0, 0, 100, 20)
+
+        ctx.drawImage(img, 0, 0, 100, 100,  0, 0, 100, 100);
+
+        const imageData = ctx.getImageData(0, 0, 100, 100);
+        return canvas.toDataURL("image/jpeg")
+        // return imageData.data;
+    }, imgSrc);
+
+    // function getClippedRegion(imageSrc, x, y, width, height) {
+    //   // const img = new Image();
+    //   // img.src = imageSrc;
+    //
+    //   const canvas = document.createElement('canvas'),
+    //       ctx = canvas.getContext('2d');
+    //
+    //   canvas.width = width;
+    //   canvas.height = height;
+    //
+    //   //                   source region         dest. region
+    //   ctx.drawImage(img, x, y, width, height,  0, 0, width, height);
+    //
+    //   return canvas.toDataURL("image/jpg");;
+    // }
+
+    const imageBuffer = readFileSync('./examples/bus-yellow-2.jpg');
+
+    const u = Buffer.from(response, "base64");
+    const q = Buffer.from(imgSrc, "base64");
+
+    //Given the encoded bytes of an image,
+    //it returns a 3D or 4D tensor of the decoded image. Supports BMP, GIF, JPEG and PNG formats.
+    const tfimage = await tensor(q);
+
+
+
+    //const response = await axios.get('./examples/bus-yellow.png', { responseType:"blob" });
+
+          //
+    // // todo need proper blob to pass in or attempt fetch again
+    // const u = await tensor(buffer);
+
+    // const t = await tensor('./bus-yellow.png')
 
     const reloadButton = await imageFrame.$('#recaptcha-reload-button');
     await reloadButton.click({ delay: rdn(3000, 5000)});

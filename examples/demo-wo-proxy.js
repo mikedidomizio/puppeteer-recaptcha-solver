@@ -18,8 +18,8 @@ async function runInstance (headless = false) {
   await page1.setDefaultNavigationTimeout(0)
   // await page1.setUserAgent(UserAgents.getRandom())
   await page1.setUserAgent('5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36');
-  // await page1.goto('https://www.google.com/recaptcha/api2/demo')
-  await page1.goto('https://www.boxrec.com/recaptcha')
+  await page1.goto('https://www.google.com/recaptcha/api2/demo')
+  //await page1.goto('https://www.boxrec.com/recaptcha')
 
   const response = await solve(page1)
 

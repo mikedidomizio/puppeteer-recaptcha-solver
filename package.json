@@ -5,6 +5,8 @@
   "license": "MIT",
   "repository": "github:danielgatis/puppeteer-recaptcha-solver",
   "dependencies": {
+    "@tensorflow-models/coco-ssd": "^2.2.2",
+    "@tensorflow/tfjs-node": "^3.19.0",
     "axios": "^0.26.1",
     "puppeteer": "^13.5.2",
     "puppeteer-extra": "^3.2.3",
