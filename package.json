@@ -4,6 +4,10 @@
   "main": "index.js",
   "license": "MIT",
   "repository": "github:danielgatis/puppeteer-recaptcha-solver",
+  "scripts": {
+    "boxrec": "node examples/boxrec.js",
+    "demo": "node examples/demo.js"
+  },
   "dependencies": {
     "puppeteer": "^16.1.0",
     "puppeteer-extra": "^3.3.4",
